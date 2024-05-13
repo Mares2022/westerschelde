@@ -2,7 +2,7 @@
 echo "Hello, World!"
 
 # Set the input file containing file paths
-inputFile="/eodc/private/deltares/path_list.txt"
+inputFile="/eodc/private/deltares/path_list_30_percentage_2023.txt"
 
 # Set the output directory where you want to unzip the files
 outputDirectory="/eodc/private/deltares/INPUT"
@@ -61,7 +61,7 @@ while IFS= read -r sourceFile; do
     echo "Processing Acolite"
     
     cd "$acoliteDirectory"
-    python launch_acolite.py --cli --settings=/eodc/private/deltares/INPUT/test_settings_CLI2.txt --inputfile="$s2image,$s2image_tile"
+    python launch_acolite.py --cli --settings=/eodc/private/deltares/settings_CLI2_changed_limits.txt --inputfile="$s2image,$s2image_tile"
 
     rm -r "$s2image"
     rm -r "$s2image_tile"
