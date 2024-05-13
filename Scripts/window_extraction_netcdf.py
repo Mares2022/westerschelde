@@ -106,7 +106,7 @@ folder_path_l2w_data   = '/eodc/private/deltares/OUTOUT_10m_2015_2024/'
 file_path_stations   = '/eodc/private/deltares/Stations.xlsx' 
 
 file_path_output_nc    =  '/eodc/private/deltares/window_extraction_output.nc'
-file_path_output_excel = '/eodc/private/deltares/window_extraction_output.xlsx' 
+file_path_output_excel = '/eodc/private/deltares/window_extraction_output.xlsx'
 
 # Get files and variable names for S2A and S2B sensors 
 sorted_files, variable_names = get_files_and_variable_names(folder_path_l2w_data)
@@ -116,7 +116,7 @@ sorted_files = sorted_files[:]
 variable_names =variable_names[:]
 
 #variable_names = ['rhow_442', 'rhow_443', 'rhow_492', 'rhow_560', 'rhow_665', 'rhow_704', 'rhow_740']
-# variable_names = ['rhow_442', 'rhow_443']
+#variable_names = ['rhow_442', 'rhow_443']
 
 df_list = []
 ds_list = []
@@ -131,7 +131,6 @@ for variable_name in variable_names:
     for file in sorted_files:
         file_path = os.path.join(folder_path_l2w_data, file)
         print("Processing file: ", file_path)
-        
         with xr.open_dataset(file_path, chunks={'x': 500, 'y': 500}) as dataset:
             time_series = [datetime.fromisoformat(dataset.attrs.get("isodate"))] 
             
