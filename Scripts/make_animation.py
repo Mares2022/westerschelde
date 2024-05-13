@@ -29,7 +29,6 @@ def create_animation(folder_path, images_end,animation_name):
 
     print(f'Animation saved as {output_filename}')
 
-folder_path  = '/eodc/private/deltares/OUTPUT'
 folder_path  = '/eodc/private/deltares/OUTPUT_10m_2015_2024'  
 
 images_end_l2w  = 'L2W_chl_re_gons.png'

@@ -6,7 +6,7 @@ from datetime import datetime
 import pandas as pd
 import altair as alt
 
-folder_path = '/home/eodc/OUTPUT'  # Replace with the actual path to your folder
+folder_path  = '/eodc/private/deltares/OUTPUT_10m_2015_2024'  
 
 # List all files in the folder
 files_in_folder = os.listdir(folder_path)
@@ -15,7 +15,6 @@ files_in_folder = os.listdir(folder_path)
 filtered_files = [file for file in files_in_folder if file.endswith("L2W.nc")]
 
 filtered_files.sort()
-
 
 datasets_list = []
 # Print the list of matching files
@@ -45,7 +44,7 @@ def make_plots(x_coord, y_coord, file_name_png, file_name_html):
     plt.ylabel('log10 CHL Gons [mg m-3]')
     plt.grid(True)
 
-    output_filename = folder_path + file_name_png
+    output_filename = '/home/eodc/PLOTS/' + file_name_png
     print(output_filename)
     plt.savefig(output_filename)
 
