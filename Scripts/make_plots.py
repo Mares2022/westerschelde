@@ -29,61 +29,79 @@ for file in filtered_files:
 
 merged_data = xr.concat(datasets_list, dim='time')
 
+def make_plots(x_coord, y_coord, file_name_png, file_name_html):
+    # Extract the time series at the specified 'x' and 'y' coordinates
+    time_series = merged_data.sel(x=x_coord, y=y_coord, method='nearest')
+
+    ch = time_series.values.tolist()
+    time = time_series.time.values.tolist()
+    time = [x / 1e9 for x in time]
+    date_strings = [datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S') for timestamp in time]
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(date_strings, ch, marker='o', color='g')
+    plt.title(f'chl_re_gons\n log10 CHL Gons [mg m-3]\n UTM Easting: {x_coord}, UTM Northing: {y_coord}')
+    plt.xlabel('Time')
+    plt.ylabel('log10 CHL Gons [mg m-3]')
+    plt.grid(True)
+
+    output_filename = folder_path + file_name_png
+    print(output_filename)
+    plt.savefig(output_filename)
+
+    data = pd.DataFrame({'Date': date_strings, 'CHL': ch})
+    y_axis_limits = (0, 10)
+
+    # Create an Altair chart
+    chart = alt.Chart(data.dropna()).mark_bar(size=10).encode(
+        x='Date:T',
+        y='CHL:Q',
+        # scale=alt.Scale(domain=list(y_axis_limits)),
+        color=alt.Color(
+            'CHL:Q', scale=alt.Scale(scheme='redyellowgreen', domain=(5, 20))),
+        tooltip=[
+            alt.Tooltip('Date:T', title='Date'),
+            alt.Tooltip('log10 CHL Gons [mg m-3]:Q', title='log10 CHL Gons [mg m-3]')
+        ]).properties(
+        width=600, height=400,
+        title=f'chl_re_gons - log10 CHL Gons [mg m-3]\n x_coord: {x_coord}, y_coord: {y_coord}'
+    )
+
+    # Display the Altair chart
+    print(folder_path + file_name_html)
+    chart.save(folder_path + file_name_html)
+
 # Specify the 'x' and 'y' coordinates for the time series
 station = 'SCHAARVODDL	Schaar van Ouden Doel'
 lon = 4.250932603
 lat = 51.35118367
-#5.8711167e+05
-#5.68962179e+06
-x_coord =  5.8711167e+05 #5.208e+05  
-y_coord =  5.68962179e+06 #5.712e+06
-#station = 'VLISSGNLDK	Vlissingen Nolledijk'
-#lon = 3.553066,	
-#lat = 51.450453
-#5.3843131e+05
-#5.70006397e+06
-#x_coord =  5.3843131e+05   
-#y_coord =  5.70006397e+06 
+x_coord =  5.8711167e+05 
+y_coord =  5.68962179e+06 
 
-# Extract the time series at the specified 'x' and 'y' coordinates
-time_series = merged_data.sel(x=x_coord, y=y_coord, method='nearest')
+file_name_png  = '/plot_ch_SCHAARVODDL.png'
+file_name_html = f"/plot_ch_atl_SCHAARVODDL.html"
 
-ch = time_series.values.tolist()
-time = time_series.time.values.tolist()
-time = [x / 1e9 for x in time]
-date_strings = [datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S') for timestamp in time]
+make_plots(x_coord, y_coord, file_name_png, file_name_html)
 
-plt.figure(figsize=(10, 6))
-plt.plot(date_strings, ch, marker='o', color='g')
-plt.title(f'chl_re_gons\n log10 CHL Gons [mg m-3]\n UTM Easting: {x_coord}, UTM Northing: {y_coord}')
-plt.xlabel('Time')
-plt.ylabel('log10 CHL Gons [mg m-3]')
-plt.grid(True)
+station = 'VLISSGNLDK	Vlissingen Nolledijk'
+lon = 3.553066	
+lat = 51.450453
+x_coord =  5.3843131e+05   
+y_coord =  5.70006397e+06
 
-output_filename = folder_path + '/plot_ch.png'
-print(output_filename)
-plt.savefig(output_filename)
+file_name_png  = '/plot_ch_VLISSGNLDK.png'
+file_name_html = f"/plot_ch_atl_VLISSGNLDK.html"
 
+make_plots(x_coord, y_coord, file_name_png, file_name_html)
 
-data = pd.DataFrame({'Date': date_strings, 'CHL': ch})
-y_axis_limits = (0, 10)
+station = 'TERNZSDSGDW	Terneuzen, scheldesteiger bij DOW'
+lon = 3.788685156
+lat = 51.35129967
+x_coord =  5.5492237e+05   
+y_coord =  5.68918718e+06 
 
-# Create an Altair chart
-chart = alt.Chart(data.dropna()).mark_bar(size=10).encode(
-    x='Date:T',
-    y='CHL:Q',
-    # scale=alt.Scale(domain=list(y_axis_limits)),
-    color=alt.Color(
-        'CHL:Q', scale=alt.Scale(scheme='redyellowgreen', domain=(5, 20))),
-    tooltip=[
-        alt.Tooltip('Date:T', title='Date'),
-        alt.Tooltip('log10 CHL Gons [mg m-3]:Q', title='log10 CHL Gons [mg m-3]')
-    ]).properties(
-    width=600, height=400,
-    title=f'chl_re_gons - log10 CHL Gons [mg m-3]\n x_coord: {x_coord}, y_coord: {y_coord}'
-)
-
-
-# Display the Altair chart
-print(folder_path + "/plot_ch_atl.html")
-chart.save(folder_path + "/plot_ch_atl.html")
+station = 'HANSWGL	Hansweert geul'
+lon = 4.014388534	
+lat = 51.43701537
+x_coord =  5.7050772e+05   
+y_coord =  5.69891249e+06 
