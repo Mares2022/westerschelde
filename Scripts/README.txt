@@ -39,15 +39,14 @@ Output:
 This code creates a netcdf with data for the coordinates defined in the Stations.xlsx, all the available images in the L2W folder, and all the variables defined.
 process_files_linux.sh
 
-#### process_files_linux_local.sh and process_files_linux_private.sh
+#### process_files_linux.sh
 
 INPUT:
 This shell code runs acolite software in a linux machine using as input a configuration file from acolite and a list of 
 images saved in INPUT folder.
 
 OUTPUT:
-The shell script saved acolite results in the selected output folder. If running process_files_linux_local.py it 
-will save the files locally, and if running process_files_linux_private.sh it will save the files in the private deltares sotorage.
+The shell script saved acolite results in the selected output folder. 
 
 Note:
 There are different process_files scripts. Each of them will save the output in local or private folders or will work
