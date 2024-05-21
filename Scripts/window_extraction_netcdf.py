@@ -94,19 +94,12 @@ def get_files_and_variable_names(folder_path):
 
     return sorted_files, variable_names
 
-def flag_central_pixel(df, specific_lat, specific_lon, stationID):
-    
-    # Adding a 1 where Latitude and Longitude match the specified values
-    df.loc[(df['Latitude'] == specific_lat) & (df['Longitude'] == specific_lon) & (df['Station'] == str(stationID)), 'flag'] = 5
-    
-    return df
-
 # Define input and outputs
 folder_path_l2w_data   = '/eodc/private/deltares/OUTOUT_10m_2015_2024/'
 file_path_stations   = '/eodc/private/deltares/Stations.xlsx' 
 
-file_path_output_nc    =  '/eodc/private/deltares/window_extraction_output.nc'
-file_path_output_excel = '/eodc/private/deltares/window_extraction_output.xlsx'
+file_path_output_nc    =  '/eodc/private/deltares/window_extraction_output_rhow_442_rhow_443.nc'
+file_path_output_excel = '/eodc/private/deltares/window_extraction_output_rhow_442_rhow_443.xlsx'
 
 # Get files and variable names for S2A and S2B sensors 
 sorted_files, variable_names = get_files_and_variable_names(folder_path_l2w_data)
