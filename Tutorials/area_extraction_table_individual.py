@@ -17,6 +17,18 @@ import cf_xarray
 from pyproj import CRS
 import dask.array as da
 
+import os
+import dask
+import xarray as xr
+import pyproj
+import rioxarray
+import pandas as pd
+import geopandas as gpd
+import numpy as np
+import rasterio
+from rasterio.features import shapes
+from shapely.geometry import shape
+
 
 def print_memory():
     # Get memory information
@@ -50,6 +62,26 @@ def get_window(x_coord, y_coord, stationID, dataset):
     
     return window_values
 
+def clip_raster(rds, geometry):
+    rds_clipped = rds.rio.clip(geometry)
+    return rds_clipped
+
+def clip_raster_with_gdf(rds, gdf):
+    rds_clipped_list = []
+    for index, row in gdf.iterrows():
+        aoi = row["Group"]
+        try:
+            geometry = gdf.iloc[index:index+1].geometry
+            rds_clipped = rds.rio.clip(geometry)
+            rds_clipped_list.append(rds_clipped)
+            print(f"Successful processing row {index} {aoi}")
+        except Exception as e:
+            print(f"Error processing row {index} {aoi}: {e}")
+            rds_clipped_list.append("NaN")
+            continue
+    print("\n")
+    return rds_clipped_list 
+
 # folder_path_l2w_data = r'P:\11209243-eo\Window_extraction\INPUT\L2W'
 folder_path_l2w_data = r'P:\11209243-eo\Window_extraction\INPUT\L2W_V2\L2W'
 folder_path_shp      = r'P:\11209243-eo\Window_extraction\OUTPUT\polygons_NEOZ.geojson'
@@ -80,7 +112,7 @@ sorted_files = sorted_files[:]
 variable_names =variable_names[:]
 
 polygons_gdf = gpd.read_file(folder_path_shp)
-polygons_gdf = polygons_gdf.to_crs('EPSG:4326')
+polygons_gdf = polygons_gdf.to_crs('EPSG:32631')
 
 for variable_name in variable_names:
 
@@ -94,70 +126,38 @@ for variable_name in variable_names:
     for file in sorted_files:
         path = os.path.join(folder_path_l2w_data, file)
         print(path)
-
-        # Open dataset
-        # dataset = xr.open_dataset(path)
-        dataset = xr.open_dataset(path, chunks={'x': 100, 'y': 100})
-
-        crs_wkt = dataset.transverse_mercator.attrs['crs_wkt']
-        crs = CRS.from_string(crs_wkt)
-        dataset.rio.write_crs(crs.to_epsg(), inplace=True)
-        dataset = dataset.rio.reproject('EPSG:4326')
-
-        variables_to_remove = ['lon', 'lat']
-        dataset =  dataset .drop_vars(variables_to_remove)
-        dataset = dataset.rename({'x': 'lon', 'y': 'lat'})
-        dataset   = dataset.reset_coords(['transverse_mercator'])
-      
-        #Assign time component as a variable
-        time_series = [datetime.fromisoformat(dataset.attrs.get("isodate"))]  
-        ds = xr.concat([dataset[variable_name]], dim=xr.DataArray(time_series, coords={"time": time_series}, dims=["time"]))
+        # rds = rioxarray.open_rasterio(path, chunks={'y': 100, 'x':100})
+        rds = rioxarray.open_rasterio(path)
+        time_series = [datetime.fromisoformat(rds.attrs.get("isodate"))]
+        rds_var = rds[variable_name]
 
         for index, row in polygons_gdf.iterrows():
-            ksa_aoi  = polygons_gdf[polygons_gdf.Group == row['Group']]
+            aoi = row["Group"]
+            try:
+                geometry = polygons_gdf.iloc[index:index+1].geometry
+                rds_nodata  = rds_var.where((rds_var != 9.96921e+36) & (rds_var != -2147483647), np.nan)
+                rds_nodata  = rds_nodata.rio.write_crs('EPSG:32631')
+                ds_masked  = rds_nodata.rio.clip(geometry, all_touched=False)
+                ds_masked  = ds_masked.where((ds_masked != 9.96921e+36) & (ds_masked != -2147483647), np.nan)
 
-            # Get coord bounds with buffer for clipping
-            ksa_lat = [float(ksa_aoi.total_bounds[1]), float(ksa_aoi.total_bounds[3])]
-            ksa_lon = [float(ksa_aoi.total_bounds[0]), float(ksa_aoi.total_bounds[2])]
-            lat_multiplier = abs(ksa_lat[1] - ksa_lat[0])
-            lon_multiplier = abs(ksa_lon[1] - ksa_lon[0])
-
-            min_lon, max_lon = ksa_lon[0] - (0.1*lon_multiplier), ksa_lon[1] + (0.1*lon_multiplier)
-            min_lat, max_lat = ksa_lat[0] - (0.1*lat_multiplier), ksa_lat[1] + (0.1*lat_multiplier)
-
-            # Generate mask
-            ksa_mask = regionmask.mask_geopandas(
-                ksa_aoi, 
-                ds.lon, 
-                ds.lat)
-
-            # Clip and mask
-            ds_clip = ds.where((ds.lat <= max_lat) & (ds.lat >= min_lat)\
-                            & (ds.lon <= max_lon) & (ds.lon >= min_lon), drop=True)
-            ds_masked = ds_clip.where(~ksa_mask.isnull())
-
-            # Calculate the mean value for the selected area
-            mean_value = ds_masked.mean().values
-            median_value = ds_masked.median().values
-            min_value = ds_masked.min().values
-            max_value = ds_masked.max().values
-            std_value = ds_masked.std().values
-            q25 = ds_masked.quantile(0.25).values
-            q75 = ds_masked.quantile(0.75).values
-            iqr_value = q75 - q25
-            count_value = ds_masked.count().values
-
-            print("Mean Value:", mean_value)
-
-            # Plot the masked DataArray
-            # plt.figure(figsize=(10, 8))
-            # group = str(row['Group'])
-            # plt.title(f'Masked {variable_name} with Polygon: {group}')
-            # ds_masked.isel(time=0).plot(cmap='viridis', robust=True)
-            # polygons_gdf.plot(ax=plt.gca(), edgecolor='red')
-            # plt.show()
-
-            statistics.append((time_series, row['Group'], mean_value, median_value, min_value, max_value, std_value, q25 , q75, iqr_value, count_value))
+                # Calculate the mean value for the selected area
+                mean_value = ds_masked.mean().values
+                median_value = ds_masked.median().values
+                min_value = ds_masked.min().values
+                max_value = ds_masked.max().values
+                std_value = ds_masked.std().values
+                q25 = ds_masked.quantile(0.25).values
+                q75 = ds_masked.quantile(0.75).values
+                iqr_value = q75 - q25
+                count_value = ds_masked.count().values
+                statistics.append((time_series, row['Group'], mean_value, median_value, min_value, max_value, std_value, q25 , q75, iqr_value, count_value))
+                print("Mean Value:", mean_value)
+                # rds_clipped_list.append(rds_clipped)
+                print(f"Successful processing row {index} {aoi}")
+            except Exception as e:
+                print(f"Error processing row {index} {aoi}: {e}")
+                # rds_clipped_list.append("NaN")
+                continue
 
     df = pd.DataFrame({
         'Time': [coord[0][0]for coord in statistics],
@@ -195,4 +195,5 @@ for variable_name in variable_names:
 
     merged_df = merged_df.replace('nan', np.nan)
     merged_df.set_index('ID', inplace=True)
-    merged_df.to_excel(excel_output_path + f'area_extraction_table_{variable_name }.xlsx',na_rep='nan')
+
+    merged_df.to_excel(excel_output_path + f'area_extraction_table_rio_{variable_name }.xlsx',na_rep='nan')
