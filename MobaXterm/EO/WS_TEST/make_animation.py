@@ -1,7 +1,7 @@
 import os
 import imageio.v2 as imageio
 
-def create_animation(folder_path, images_end,animation_name):
+def create_animation(folder_path, output_path, images_end,animation_name):
     files_in_folder = os.listdir(folder_path)
     filtered_files = [file for file in files_in_folder if file.endswith(images_end)]
 
@@ -14,7 +14,7 @@ def create_animation(folder_path, images_end,animation_name):
         print(path)
 
     #output_filename = folder_path + '/ch_animation.mp4'
-    output_filename = '/home/eodc/PLOTS/' + animation_name
+    output_filename = output_path + animation_name
 
     writer = imageio.get_writer(output_filename, duration=300) 
     #writer = imageio.get_writer(output_filename)
@@ -29,16 +29,17 @@ def create_animation(folder_path, images_end,animation_name):
 
     print(f'Animation saved as {output_filename}')
 
-folder_path  = '/eodc/private/deltares/OUTPUT_10m_2015_2024'  
+folder_path  = '/eodc/private/deltares/EO/WS/OUTPUT/' 
+output_path  = '/home/eodc/EO/WS/RESULTS/' 
 
 images_end_l2w  = 'L2W_chl_re_gons.png'
 images_end_l1c  = 'L1R_rgb_rhot.png'
 images_end_l2a  = 'L2R_rgb_rhos.png'
 
-animation_name_l2w = '/ch_animation.gif'
-animation_name_l1c = '/l1c_animation.gif'
-animation_name_l2a = '/l2a_animation.gif'
+animation_name_l2w = 'ch_animation.gif'
+animation_name_l1c = 'l1c_animation.gif'
+animation_name_l2a = 'l2a_animation.gif'
 
-create_animation(folder_path, images_end_l2w, animation_name_l2w)
-create_animation(folder_path,images_end_l1c, animation_name_l1c)
-create_animation(folder_path,images_end_l2a, animation_name_l2a)
+create_animation(folder_path, output_path, images_end_l2w, animation_name_l2w)
+create_animation(folder_path, output_path, images_end_l1c, animation_name_l1c)
+create_animation(folder_path, output_path, images_end_l2a, animation_name_l2a)

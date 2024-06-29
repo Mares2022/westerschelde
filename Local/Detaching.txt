@@ -1,0 +1,19 @@
+open terminal
+
+screen + enter + enter
+
+ctr a + ctr d
+
+close window
+
+open terminal
+
+screen -ls
+screen -r [ID] (To open a new session)
+ctr a + ctr d
+
+open terminal 
+screen -XS [ID] (To kill a process)
+
+Screen nee
+

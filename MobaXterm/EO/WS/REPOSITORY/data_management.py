@@ -5,7 +5,7 @@ import pandas as pd
 import geopandas as gpd
 
 # csv_file_path = r'c:\Users\fuentesm\CISNE\Deltares\Westershelde\INPUT\Sentinel-2-collection-to-feature-31UES.csv'
-csv_file_path_with_geometry = '/home/eodc/INPUT/Sentinel-2-collection-to-feature-31UET_30_percentage_cloud_coverage.csv'
+csv_file_path_with_geometry = '/home/eodc/EO/WS_PRODUCTION/INPUT/Sentinel-2-collection-to-feature-31UET_30_percentage_cloud_coverage.csv'
 
 # df = pd.read_csv(csv_file_path, header=0)  # Set header=0 to use the first row as columns
 gdf = gpd.read_file(csv_file_path_with_geometry)
@@ -64,7 +64,7 @@ for index, row in products[:].iterrows():
 
 
 # Specify the path to the output text file
-output_file_path = os.path.join('/home/eodc/INPUT', 'path_list_30_percentage.txt')
+output_file_path = os.path.join('/home/eodc/EO/WS_PRODUCTION/INPUT/', 'path_list_30_percentage.txt')
 
 #zip_file_path = os.path.join(script_dir, 'path_list.txt')
 

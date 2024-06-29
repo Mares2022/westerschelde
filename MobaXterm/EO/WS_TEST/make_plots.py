@@ -6,7 +6,7 @@ from datetime import datetime
 import pandas as pd
 import altair as alt
 
-folder_path  = '/eodc/private/deltares/OUTPUT_10m_2015_2024'  
+folder_path  = '/eodc/private/deltares/EO/WS/OUTPUT/'    
 
 # List all files in the folder
 files_in_folder = os.listdir(folder_path)
@@ -28,7 +28,7 @@ for file in filtered_files:
 
 merged_data = xr.concat(datasets_list, dim='time')
 
-def make_plots(x_coord, y_coord, file_name_png, file_name_html):
+def make_plots(x_coord, y_coord, file_name_png, file_name_html, output_path):
     # Extract the time series at the specified 'x' and 'y' coordinates
     time_series = merged_data.sel(x=x_coord, y=y_coord, method='nearest')
 
@@ -44,7 +44,7 @@ def make_plots(x_coord, y_coord, file_name_png, file_name_html):
     plt.ylabel('log10 CHL Gons [mg m-3]')
     plt.grid(True)
 
-    output_filename = '/home/eodc/PLOTS/' + file_name_png
+    output_filename = output_path + file_name_png
     print(output_filename)
     plt.savefig(output_filename)
 
@@ -67,8 +67,8 @@ def make_plots(x_coord, y_coord, file_name_png, file_name_html):
     )
 
     # Display the Altair chart
-    print(folder_path + file_name_html)
-    chart.save(folder_path + file_name_html)
+    print(output_path + file_name_html)
+    chart.save(output_path + file_name_html)
 
 # Specify the 'x' and 'y' coordinates for the time series
 station = 'SCHAARVODDL	Schaar van Ouden Doel'
@@ -77,10 +77,11 @@ lat = 51.35118367
 x_coord =  5.8711167e+05 
 y_coord =  5.68962179e+06 
 
-file_name_png  = '/plot_ch_SCHAARVODDL.png'
-file_name_html = f"/plot_ch_atl_SCHAARVODDL.html"
+file_name_png  = 'plot_ch_SCHAARVODDL.png'
+file_name_html = 'plot_ch_atl_SCHAARVODDL.html'
+output_path = '/home/eodc/EO/WS/RESULTS/'
 
-make_plots(x_coord, y_coord, file_name_png, file_name_html)
+make_plots(x_coord, y_coord, file_name_png, file_name_html, output_path)
 
 station = 'VLISSGNLDK	Vlissingen Nolledijk'
 lon = 3.553066	
@@ -88,10 +89,11 @@ lat = 51.450453
 x_coord =  5.3843131e+05   
 y_coord =  5.70006397e+06
 
-file_name_png  = '/plot_ch_VLISSGNLDK.png'
-file_name_html = f"/plot_ch_atl_VLISSGNLDK.html"
+file_name_png  = 'plot_ch_VLISSGNLDK.png'
+file_name_html = '/plot_ch_atl_VLISSGNLDK.html'
+output_path = '/home/eodc/EO/WS/RESULTS/'
 
-make_plots(x_coord, y_coord, file_name_png, file_name_html)
+make_plots(x_coord, y_coord, file_name_png, file_name_html, output_path)
 
 station = 'TERNZSDSGDW	Terneuzen, scheldesteiger bij DOW'
 lon = 3.788685156
